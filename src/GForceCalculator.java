@@ -44,9 +44,9 @@ public class GForceCalculator {
         // Assuming accelerationX, accelerationY, and accelerationZ are obtained from Microsoft Flight Simulator
         // You need to replace these with actual values obtained from the simulator
 
-        double accelerationX = 10; // making a right turn
-        double accelerationY = 5; // pitch up
-        double accelerationZ = 20; // increase attitude
+        double accelerationX = 6; // making a right turn
+        double accelerationY = 0; // pitch up
+        double accelerationZ = 5; // increase attitude
 
         GForceCalculator calculator = new GForceCalculator(accelerationX, accelerationY, accelerationZ);
         double totalGForce = calculator.calculateTotalGForce();
