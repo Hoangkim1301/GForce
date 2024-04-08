@@ -77,13 +77,32 @@ public class GForceMeter extends JPanel {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        // Example usage: Set acceleration values periodically
-        Timer timer = new Timer(1000, e -> {
-            double accelerationX = 10; // Generate random acceleration between -2 and 2 m/s^2
-            double accelerationY = 10;
-            double accelerationZ = 20;
-            gForceMeter.setAccelerations(accelerationX, accelerationY, accelerationZ);
-        });
-        timer.start();
+        // Define arrays for acceleration values and time delays
+        double[] accelerationXValues = {0, 0, 0, 0}; // Acceleration in X-axis (forward motion)
+        double[] accelerationYValues = {0, 5, 10, 15}; // Acceleration in Y-axis (lift-off)
+        double[] accelerationZValues = {0, 0, 5, 12}; // Acceleration in Z-axis (climbing)
+        int timeDelay = 1000; // Example time delays in milliseconds
+
+        // Iterate through arrays and set acceleration values periodically
+        for (int i = 0; i < accelerationXValues.length; i++) {
+            double accelerationX = accelerationXValues[i];
+            double accelerationY = accelerationYValues[i];
+            double accelerationZ = accelerationZValues[i];
+
+            // Schedule setting acceleration values with a time delay
+            Timer timer = new Timer(timeDelay, e -> {
+                gForceMeter.setAccelerations(accelerationX, accelerationY, accelerationZ);
+            });
+            timer.setRepeats(false); // Set to execute only once
+            timer.start();
+
+            // Sleep to wait for the current timer to finish before scheduling the next one
+            try {
+                Thread.sleep(timeDelay);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+
     }
 }
