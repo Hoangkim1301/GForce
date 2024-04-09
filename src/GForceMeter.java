@@ -3,16 +3,16 @@ import java.awt.*;
 
 
 public class GForceMeter extends JPanel {
-    private double acceleration_Long;
-    private double acceleration_Ver;
-    private double acceleration_Lat;
-    private double rotationAcceleration_Long;
-    private double rotationAcceleration_Ver;
-    private double rotationAcceleration_Lat;
+    double acceleration_Long;
+    double acceleration_Ver;
+    double acceleration_Lat;
+    double rotationAcceleration_Long;
+    double rotationAcceleration_Ver;
+    double rotationAcceleration_Lat;
     private double gForce;
     private int centerX;
     private int centerY;
-    private final int SCALE_FACTOR = 20; // Increased scaling factor
+    private final int SCALE_FACTOR = 10; // Increased scaling factor
     private double[] accelerationLongBuffer;
     private double[] accelerationVerBuffer;
     private double[] accelerationLatBuffer;
@@ -23,7 +23,7 @@ public class GForceMeter extends JPanel {
 
      */
     public GForceMeter() {
-        this.setPreferredSize(new Dimension(1000, 1000)); // Adjusted size for visibility
+        this.setPreferredSize(new Dimension(400, 700)); // Adjusted size for visibility
         this.acceleration_Long = 0;
         this.acceleration_Ver = 0;
         this.acceleration_Lat = 0;
@@ -84,7 +84,7 @@ public class GForceMeter extends JPanel {
 
     private void drawGraph(Graphics g, double[] buffer,String name, Color color, int yOffset) {
         g.setColor(color);
-        int graphHeight = getHeight() / 3;
+        int graphHeight = getHeight() / 20;
         int graphWidth = getWidth() - 20;
         int scaleX = graphWidth / BUFFER_SIZE;
         int scaleY = graphHeight / 10; // Scale the graph to fit within the panel
@@ -116,24 +116,24 @@ public class GForceMeter extends JPanel {
         centerY = getHeight() / 2;
 
         // Draw circular G-force meter
-        int radius = 200; // Adjusted radius to fit within the panel
+        int radius = 100; // Adjusted radius to fit within the panel
         //g.setColor(Color.LIGHT_GRAY);
-        g.drawOval(centerX - radius, centerY - radius, 2 * radius, 2 * radius);
+        g.drawOval(centerX - radius, centerY - radius -200, 2 * radius, 2 * radius);
 
         // Draw coordinate axes
-        g.drawLine(20, centerY, getWidth() - 20, centerY); // X-axis
-        g.drawLine(centerX, 20, centerX, getHeight() - 20); // Y-axis
+        g.drawLine(20, centerY-200, getWidth() - 20, centerY-200); // X-axis
+        g.drawLine(centerX, 20, centerX, getHeight()/2 + 20); // Y-axis
 
         // Draw coordinate labels
-        g.drawString("0", centerX - 5, centerY + 15); // Label for origin (0,0)
-        g.drawString("+G", centerX - 10, getHeight() - 10); // Label for positive G-axis
+        g.drawString("0", centerX - 5, centerY -200 +15); // Label for origin (0,0)
+        g.drawString("+G", centerX - 10, getHeight() /2 + 15); // Label for positive G-axis
         g.drawString("+G", centerX - 10, 30); // Label for negative G-axis
-        g.drawString("+G", getWidth() - 25, centerY + 5); // Label for positive G-axis
-        g.drawString("+G", 5, centerY + 5); // Label for negative G-axis
+        g.drawString("+G", getWidth() - 25, centerY -200 + 5); // Label for positive G-axis
+        g.drawString("+G", 5, centerY -200  + 5); // Label for negative G-axis
 
         // Draw G-force point
         int x = centerX;
-        int y = centerY;
+        int y = centerY-200;
 
         // Convert G-force to pixel offset from the center
         int pixelOffsetAcc_Long = (int) (acceleration_Long * SCALE_FACTOR); // Scale factor of 20 pixels per G
@@ -172,12 +172,14 @@ public class GForceMeter extends JPanel {
         g.fillOval(x - 5, y - 5, 10, 10);
         g.drawString("Total G-force: " + String.format("%.2f", gForce), getWidth() - 150, 20);
         g.drawString("Cockpit degree: " + String.format("%.2f", Math.toDegrees(Math.atan(gForce))), getWidth() - 150, 30);
+        g.drawString("X degree: " +  String.format("%.2f",Math.toDegrees(Math.atan((Math.sqrt(Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2)))/9.81))), getWidth() - 150, 40);
+        g.drawString("Y degree: " +  String.format("%.2f",Math.toDegrees(Math.atan((Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2)))/9.81))), getWidth() - 150, 50);
 
         // Draw acceleration graphs
         // Draw acceleration graphs
-        drawGraph(g, accelerationLongBuffer, "Acceleration: "+ accelerationLongBuffer[accelerationLongBuffer.length-1],Color.RED, centerY - 250);
-        drawGraph(g, accelerationVerBuffer, "Attitude: " + accelerationVerBuffer[accelerationVerBuffer.length-1],Color.GREEN, centerY - 300);
-        drawGraph(g, accelerationLatBuffer, "Lateral: " + accelerationLatBuffer[accelerationVerBuffer.length-1],Color.BLUE, centerY - 350);
+        drawGraph(g, accelerationLongBuffer, "Acceleration: "+ accelerationLongBuffer[accelerationLongBuffer.length-1],Color.RED, centerY - 150);
+        drawGraph(g, accelerationVerBuffer, "Attitude: " + accelerationVerBuffer[accelerationVerBuffer.length-1],Color.GREEN, centerY - 200);
+        drawGraph(g, accelerationLatBuffer, "Lateral: " + accelerationLatBuffer[accelerationVerBuffer.length-1],Color.BLUE, centerY - 250);
     }
 
     public static void main(String[] args) {
@@ -195,7 +197,7 @@ public class GForceMeter extends JPanel {
         acceleration values to simulate the gradual acceleration along the x-axis (forward motion), lift-off along the
         y-axis, and climbing along the z-axis. Adjust the duration and values as needed for your simulation.
          */
-        double[] acceleration_Long_Values = {0, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6.5, 2, 1, 0, -2, -2.3, 0}; // Acceleration in X-axis (forward motion)
+        double[] acceleration_Long_Values = {0, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6.5, 2, 1, 0, -2, -2.3, 1}; // Acceleration in X-axis (forward motion)
         double[] acceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 4, 4, 4, 5, 4, 4, 4, 4, 3, 3, 3, 0}; // Acceleration in Y-axis (lift-off)
         double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
         double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis

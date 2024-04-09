@@ -11,8 +11,7 @@ public class GForceCalculator {
 
     public double calculateTotalGForce() {
         double totalAcceleration = Math.sqrt(Math.pow(accelerationX, 2) + Math.pow(accelerationY, 2) + Math.pow(accelerationZ, 2));
-        double gForce = totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
-        return gForce;
+        return totalAcceleration / 9.81;
     }
 
     public String calculateDirection() {
