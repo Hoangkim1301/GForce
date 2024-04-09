@@ -1,42 +1,68 @@
 import javax.swing.*;
 import java.awt.*;
 
+
 public class GForceMeter extends JPanel {
-    private double accelerationX;
-    private double accelerationY;
-    private double accelerationZ;
-    private double rotationAccelerationX;
-    private double rotationAccelerationY;
-    private double rotationAccelerationZ;
+    private double acceleration_Long;
+    private double acceleration_Ver;
+    private double acceleration_Lat;
+    private double rotationAcceleration_Long;
+    private double rotationAcceleration_Ver;
+    private double rotationAcceleration_Lat;
     private double gForce;
     private int centerX;
     private int centerY;
     private final int SCALE_FACTOR = 20; // Increased scaling factor
+    private double[] accelerationLongBuffer;
+    private double[] accelerationVerBuffer;
+    private double[] accelerationLatBuffer;
+    private final int BUFFER_SIZE = 100; // Buffer size for storing acceleration history
+
 
     /*
 
      */
     public GForceMeter() {
-        this.setPreferredSize(new Dimension(600, 600)); // Adjusted size for visibility
-        this.accelerationX = 0;
-        this.accelerationY = 0;
-        this.accelerationZ = 0;
-        this.rotationAccelerationX = 0;
-        this.rotationAccelerationY = 0;
-        this.rotationAccelerationZ = 0;
+        this.setPreferredSize(new Dimension(1000, 1000)); // Adjusted size for visibility
+        this.acceleration_Long = 0;
+        this.acceleration_Ver = 0;
+        this.acceleration_Lat = 0;
+        this.rotationAcceleration_Long = 0;
+        this.rotationAcceleration_Ver = 0;
+        this.rotationAcceleration_Lat = 0;
         this.gForce = 0;
+
+        // Initialize buffers
+        accelerationLongBuffer = new double[BUFFER_SIZE];
+        accelerationVerBuffer = new double[BUFFER_SIZE];
+        accelerationLatBuffer = new double[BUFFER_SIZE];
     }
 
     public void setAccelerations (double accelerationX, double accelerationY, double accelerationZ,
     double rotationAccelerationX, double rotationAccelerationY, double rotationAccelerationZ) {
-        this.accelerationX = accelerationX;
-        this.accelerationY = accelerationY;
-        this.accelerationZ = accelerationZ;
-        this.rotationAccelerationX = rotationAccelerationX;
-        this.rotationAccelerationY = rotationAccelerationY;
-        this.rotationAccelerationZ = rotationAccelerationZ;
+        this.acceleration_Long = accelerationX;
+        this.acceleration_Ver = accelerationY;
+        this.acceleration_Lat = accelerationZ;
+        this.rotationAcceleration_Long = rotationAccelerationX;
+        this.rotationAcceleration_Ver = rotationAccelerationY;
+        this.rotationAcceleration_Lat = rotationAccelerationZ;
         this.gForce = calculateTotalGForce();
+
+        // Add acceleration values to the buffers
+        addToBuffer(accelerationLongBuffer, accelerationX);
+        addToBuffer(accelerationVerBuffer, accelerationY);
+        addToBuffer(accelerationLatBuffer, accelerationZ);
+
         repaint(); // Update the display when accelerations change
+    }
+
+    private void addToBuffer(double[] buffer, double value) {
+        // Shift elements in the buffer to make space for the new value
+        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
+            buffer[i] = buffer[i + 1];
+        }
+        // Add the new value to the end of the buffer
+        buffer[BUFFER_SIZE - 1] = value;
     }
 
     //Convert Feet per second square to meter per second square
@@ -47,13 +73,38 @@ public class GForceMeter extends JPanel {
 
     private double calculateTotalGForce() {
         // Calculate total linear acceleration magnitude
-        double totalLinearAcceleration = Math.sqrt(Math.pow(accelerationX, 2) + Math.pow(accelerationY, 2) + Math.pow(accelerationZ, 2));
+        double totalLinearAcceleration = Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver, 2) + Math.pow(acceleration_Lat, 2));
         // Calculate total rotational acceleration magnitude
-        double totalRotationAcceleration = Math.sqrt(Math.pow(rotationAccelerationX, 2) + Math.pow(rotationAccelerationY, 2) + Math.pow(rotationAccelerationZ, 2));
+        double totalRotationAcceleration = Math.sqrt(Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2));
         // Combine linear and rotational accelerations to calculate total G-force
-        double totalAcceleration = Math.sqrt(Math.pow(totalLinearAcceleration, 2) + Math.pow(totalRotationAcceleration, 2));
+        double totalAcceleration = Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver, 2) + Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2));
         // Convert acceleration to G-force
         return totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
+    }
+
+    private void drawGraph(Graphics g, double[] buffer,String name, Color color, int yOffset) {
+        g.setColor(color);
+        int graphHeight = getHeight() / 3;
+        int graphWidth = getWidth() - 20;
+        int scaleX = graphWidth / BUFFER_SIZE;
+        int scaleY = graphHeight / 10; // Scale the graph to fit within the panel
+
+        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
+            int x1 = i * scaleX + 10;
+            int y1 = getHeight() - (int) (buffer[i] * scaleY) - 10 - yOffset;
+            int x2 = (i + 1) * scaleX + 10;
+            int y2 = getHeight() - (int) (buffer[i + 1] * scaleY) - 10 - yOffset;
+
+            g.drawLine(x1, y1, x2, y2);
+            // Draw label for the buffer name
+            if (i == BUFFER_SIZE/2 ) { // Draw the label roughly in the middle of the line
+                FontMetrics fm = g.getFontMetrics();
+                int labelHeight = fm.getHeight();
+                int labelX = 10; // Adjust this value as needed for spacing
+                int labelY = y1 + labelHeight / 2;
+                g.drawString(name, labelX,  y1-5);
+            }
+        }
     }
 
     @Override
@@ -65,7 +116,7 @@ public class GForceMeter extends JPanel {
         centerY = getHeight() / 2;
 
         // Draw circular G-force meter
-        int radius = Math.min(getWidth(), getHeight()) / 2 - 80; // Adjusted radius to fit within the panel
+        int radius = 200; // Adjusted radius to fit within the panel
         //g.setColor(Color.LIGHT_GRAY);
         g.drawOval(centerX - radius, centerY - radius, 2 * radius, 2 * radius);
 
@@ -85,24 +136,48 @@ public class GForceMeter extends JPanel {
         int y = centerY;
 
         // Convert G-force to pixel offset from the center
-        int pixelOffsetAccX = (int) (accelerationX * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetAccY = (int) (accelerationY * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetAccZ = (int) (accelerationZ * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetRollX = (int) (rotationAccelerationX * SCALE_FACTOR);
-        int pixelOffsetRollY = (int) (rotationAccelerationY * SCALE_FACTOR);
-        int pixelOffsetRollZ = (int) (rotationAccelerationZ * SCALE_FACTOR);
+        int pixelOffsetAcc_Long = (int) (acceleration_Long * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetAcc_Ver = (int) (acceleration_Ver * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetAcc_Lat = (int) (acceleration_Lat * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetRoll_Long = (int) (rotationAcceleration_Long * SCALE_FACTOR);
+        int pixelOffsetRoll_Ver = (int) (rotationAcceleration_Ver * SCALE_FACTOR);
+        int pixelOffsetRoll_Lat = (int) (rotationAcceleration_Lat * SCALE_FACTOR);
 
-        x -= pixelOffsetAccZ;
-        x -= pixelOffsetRollX;
-        x -= pixelOffsetRollY;
+        x -= pixelOffsetAcc_Lat;
+        x -= pixelOffsetRoll_Long;
+        x -= pixelOffsetRoll_Ver;
 
-        y -= pixelOffsetRollZ;
-        y += pixelOffsetAccX; // Adjusting for correct direction
-        y += pixelOffsetAccY; // Invert the offset to align with GUI coordinates
+        y -= pixelOffsetRoll_Lat;
+        y += pixelOffsetAcc_Long; // Adjusting for correct direction
+        y += pixelOffsetAcc_Ver; // Invert the offset to align with GUI coordinates
+
+        if(y==centerY){
+            g.drawString("Neutral", x + 10, y + 10);
+        }else if(y > centerY) {
+            g.drawString("Lean Back", x + 10, y + 10);
+        } else {
+            g.drawString("Lean Forward", x + 10, y + 10);
+        }
+        if(x==centerX){
+            g.drawString("Neutral", x + 10, y + 25);
+        }
+        else if (x > centerX) {
+            g.drawString("Lean Right", x + 10, y + 25);
+        } else {
+            g.drawString("Lean Left", x + 10, y + 25);
+        }
+
         // Draw a circle representing the G-force point
         g.setColor(Color.RED);
         g.fillOval(x - 5, y - 5, 10, 10);
         g.drawString("Total G-force: " + String.format("%.2f", gForce), getWidth() - 150, 20);
+        g.drawString("Cockpit degree: " + String.format("%.2f", Math.toDegrees(Math.atan(gForce))), getWidth() - 150, 30);
+
+        // Draw acceleration graphs
+        // Draw acceleration graphs
+        drawGraph(g, accelerationLongBuffer, "Acceleration: "+ accelerationLongBuffer[accelerationLongBuffer.length-1],Color.RED, centerY - 250);
+        drawGraph(g, accelerationVerBuffer, "Attitude: " + accelerationVerBuffer[accelerationVerBuffer.length-1],Color.GREEN, centerY - 300);
+        drawGraph(g, accelerationLatBuffer, "Lateral: " + accelerationLatBuffer[accelerationVerBuffer.length-1],Color.BLUE, centerY - 350);
     }
 
     public static void main(String[] args) {
@@ -120,23 +195,23 @@ public class GForceMeter extends JPanel {
         acceleration values to simulate the gradual acceleration along the x-axis (forward motion), lift-off along the
         y-axis, and climbing along the z-axis. Adjust the duration and values as needed for your simulation.
          */
-        double[] accelerationXValues = {0, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6.5, 6.4, 6.3, 6.4, 6.4, 6.3, 7}; // Acceleration in X-axis (forward motion)
-        double[] accelerationYValues = {0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 4, 4, 4, 5, 4, 4, 4, 4, 3, 3, 3, 3}; // Acceleration in Y-axis (lift-off)
-        double[] accelerationZValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
-        double[] rotationAccelerationXValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
-        double[] rotationAccelerationYValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Y-axis
-        double[] rotationAccelerationZValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
+        double[] acceleration_Long_Values = {0, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6.5, 2, 1, 0, -2, -2.3, 0}; // Acceleration in X-axis (forward motion)
+        double[] acceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 4, 4, 4, 5, 4, 4, 4, 4, 3, 3, 3, 0}; // Acceleration in Y-axis (lift-off)
+        double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
+        double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
+        double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2}; // Example rotation acceleration in Y-axis
+        double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 3, 3, 0, 0}; // Example rotation acceleration in Z-axis
 
         int timeDelay = 500; // Example time delays in milliseconds
 
         // Iterate through arrays and set acceleration values periodically
-        for (int i = 0; i < accelerationXValues.length; i++) {
-            double accelerationX = accelerationXValues[i];
-            double accelerationY = accelerationYValues[i];
-            double accelerationZ = accelerationZValues[i];
-            double rotationAccelerationX = rotationAccelerationXValues[i];
-            double rotationAccelerationY = rotationAccelerationYValues[i];
-            double rotationAccelerationZ = rotationAccelerationZValues[i];
+        for (int i = 0; i < acceleration_Long_Values.length; i++) {
+            double accelerationX = acceleration_Long_Values[i];
+            double accelerationY = acceleration_Ver_Values[i];
+            double accelerationZ = acceleration_Lat_Values[i];
+            double rotationAccelerationX = rotationAcceleration_Long_Values[i];
+            double rotationAccelerationY = rotationAcceleration_Ver_Values[i];
+            double rotationAccelerationZ = rotationAcceleration_Lat_Values[i];
 
 
             // Schedule setting acceleration values with a time delay
