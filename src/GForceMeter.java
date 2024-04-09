@@ -10,6 +10,9 @@ public class GForceMeter extends JPanel {
     private int centerY;
     private final int SCALE_FACTOR = 20; // Increased scaling factor
 
+    /*
+
+     */
     public GForceMeter() {
         this.setPreferredSize(new Dimension(600, 600)); // Adjusted size for visibility
         this.accelerationX = 0;
@@ -24,6 +27,12 @@ public class GForceMeter extends JPanel {
         this.accelerationZ = accelerationZ;
         this.gForce = calculateTotalGForce();
         repaint(); // Update the display when accelerations change
+    }
+
+    //Convert Feet per second square to meter per second square
+    public double feet_to_meter(double velocity){
+        double FEET_TO_METERS = 0.3048;
+        return velocity * FEET_TO_METERS;
     }
 
     private double calculateTotalGForce() {
@@ -65,8 +74,8 @@ public class GForceMeter extends JPanel {
         int pixelOffsetX = (int) (accelerationX * SCALE_FACTOR); // Scale factor of 20 pixels per G
         int pixelOffsetY = (int) (accelerationY * SCALE_FACTOR); // Scale factor of 20 pixels per G
         int pixelOffsetZ = (int) (accelerationZ * SCALE_FACTOR);
-        x -= pixelOffsetY; // Adjusting for correct direction
-        y += pixelOffsetX; // Invert the offset to align with GUI coordinates
+        y += pixelOffsetX; // Adjusting for correct direction
+        y += pixelOffsetY; // Invert the offset to align with GUI coordinates
 
         // Draw a circle representing the G-force point
         g.setColor(Color.RED);
@@ -89,9 +98,9 @@ public class GForceMeter extends JPanel {
         acceleration values to simulate the gradual acceleration along the x-axis (forward motion), lift-off along the
         y-axis, and climbing along the z-axis. Adjust the duration and values as needed for your simulation.
          */
-        double[] accelerationXValues = {0, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}; // Acceleration in X-axis (forward motion)
-        double[] accelerationYValues = {0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, -2, -2, 1, 0.5, 1, 0, 0, 0}; // Acceleration in Y-axis (lift-off)
-        double[] accelerationZValues = {0, 0, 5, 5, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 5, 5}; // Acceleration in Z-axis (climbing)
+        double[] accelerationXValues = {0, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6.5, 6.4, 6.3, 6.4, 6.4, 6.3, 7}; // Acceleration in X-axis (forward motion)
+        double[] accelerationYValues = {0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 4, 4, 4, 5, 4, 4, 4, 4, 3, 3, 3, 3}; // Acceleration in Y-axis (lift-off)
+        double[] accelerationZValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
 
         int timeDelay = 500; // Example time delays in milliseconds
 
