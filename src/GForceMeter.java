@@ -5,6 +5,9 @@ public class GForceMeter extends JPanel {
     private double accelerationX;
     private double accelerationY;
     private double accelerationZ;
+    private double rotationAccelerationX;
+    private double rotationAccelerationY;
+    private double rotationAccelerationZ;
     private double gForce;
     private int centerX;
     private int centerY;
@@ -18,13 +21,20 @@ public class GForceMeter extends JPanel {
         this.accelerationX = 0;
         this.accelerationY = 0;
         this.accelerationZ = 0;
+        this.rotationAccelerationX = 0;
+        this.rotationAccelerationY = 0;
+        this.rotationAccelerationZ = 0;
         this.gForce = 0;
     }
 
-    public void setAccelerations(double accelerationX, double accelerationY, double accelerationZ) {
+    public void setAccelerations (double accelerationX, double accelerationY, double accelerationZ,
+    double rotationAccelerationX, double rotationAccelerationY, double rotationAccelerationZ) {
         this.accelerationX = accelerationX;
         this.accelerationY = accelerationY;
         this.accelerationZ = accelerationZ;
+        this.rotationAccelerationX = rotationAccelerationX;
+        this.rotationAccelerationY = rotationAccelerationY;
+        this.rotationAccelerationZ = rotationAccelerationZ;
         this.gForce = calculateTotalGForce();
         repaint(); // Update the display when accelerations change
     }
@@ -36,8 +46,12 @@ public class GForceMeter extends JPanel {
     }
 
     private double calculateTotalGForce() {
-        // Calculate total acceleration magnitude
-        double totalAcceleration = Math.sqrt(Math.pow(accelerationX, 2) + Math.pow(accelerationY, 2) + Math.pow(accelerationZ, 2));
+        // Calculate total linear acceleration magnitude
+        double totalLinearAcceleration = Math.sqrt(Math.pow(accelerationX, 2) + Math.pow(accelerationY, 2) + Math.pow(accelerationZ, 2));
+        // Calculate total rotational acceleration magnitude
+        double totalRotationAcceleration = Math.sqrt(Math.pow(rotationAccelerationX, 2) + Math.pow(rotationAccelerationY, 2) + Math.pow(rotationAccelerationZ, 2));
+        // Combine linear and rotational accelerations to calculate total G-force
+        double totalAcceleration = Math.sqrt(Math.pow(totalLinearAcceleration, 2) + Math.pow(totalRotationAcceleration, 2));
         // Convert acceleration to G-force
         return totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
     }
@@ -51,7 +65,7 @@ public class GForceMeter extends JPanel {
         centerY = getHeight() / 2;
 
         // Draw circular G-force meter
-        int radius = Math.min(getWidth(), getHeight()) / 2 - 100; // Adjusted radius to fit within the panel
+        int radius = Math.min(getWidth(), getHeight()) / 2 - 80; // Adjusted radius to fit within the panel
         //g.setColor(Color.LIGHT_GRAY);
         g.drawOval(centerX - radius, centerY - radius, 2 * radius, 2 * radius);
 
@@ -71,12 +85,20 @@ public class GForceMeter extends JPanel {
         int y = centerY;
 
         // Convert G-force to pixel offset from the center
-        int pixelOffsetX = (int) (accelerationX * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetY = (int) (accelerationY * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetZ = (int) (accelerationZ * SCALE_FACTOR);
-        y += pixelOffsetX; // Adjusting for correct direction
-        y += pixelOffsetY; // Invert the offset to align with GUI coordinates
+        int pixelOffsetAccX = (int) (accelerationX * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetAccY = (int) (accelerationY * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetAccZ = (int) (accelerationZ * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetRollX = (int) (rotationAccelerationX * SCALE_FACTOR);
+        int pixelOffsetRollY = (int) (rotationAccelerationY * SCALE_FACTOR);
+        int pixelOffsetRollZ = (int) (rotationAccelerationZ * SCALE_FACTOR);
 
+        x -= pixelOffsetAccZ;
+        x -= pixelOffsetRollX;
+        x -= pixelOffsetRollY;
+
+        y -= pixelOffsetRollZ;
+        y += pixelOffsetAccX; // Adjusting for correct direction
+        y += pixelOffsetAccY; // Invert the offset to align with GUI coordinates
         // Draw a circle representing the G-force point
         g.setColor(Color.RED);
         g.fillOval(x - 5, y - 5, 10, 10);
@@ -101,6 +123,9 @@ public class GForceMeter extends JPanel {
         double[] accelerationXValues = {0, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6.5, 6.4, 6.3, 6.4, 6.4, 6.3, 7}; // Acceleration in X-axis (forward motion)
         double[] accelerationYValues = {0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 4, 4, 4, 5, 4, 4, 4, 4, 3, 3, 3, 3}; // Acceleration in Y-axis (lift-off)
         double[] accelerationZValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
+        double[] rotationAccelerationXValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
+        double[] rotationAccelerationYValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Y-axis
+        double[] rotationAccelerationZValues = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
 
         int timeDelay = 500; // Example time delays in milliseconds
 
@@ -109,10 +134,15 @@ public class GForceMeter extends JPanel {
             double accelerationX = accelerationXValues[i];
             double accelerationY = accelerationYValues[i];
             double accelerationZ = accelerationZValues[i];
+            double rotationAccelerationX = rotationAccelerationXValues[i];
+            double rotationAccelerationY = rotationAccelerationYValues[i];
+            double rotationAccelerationZ = rotationAccelerationZValues[i];
+
 
             // Schedule setting acceleration values with a time delay
             Timer timer = new Timer(timeDelay, e -> {
-                gForceMeter.setAccelerations(accelerationX, accelerationY, accelerationZ);
+                gForceMeter.setAccelerations(accelerationX, accelerationY, accelerationZ,
+                        rotationAccelerationX, rotationAccelerationY, rotationAccelerationZ);
             });
             timer.setRepeats(false); // Set to execute only once
             timer.start();
