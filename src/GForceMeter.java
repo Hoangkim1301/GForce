@@ -117,7 +117,7 @@ public class GForceMeter extends JPanel {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         // Calculate center coordinates
@@ -208,13 +208,25 @@ public class GForceMeter extends JPanel {
         y-axis, and climbing along the z-axis. Adjust the duration and values as needed for your simulation.
          */
 
-
+/*
         double[] acceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, -5, -5, -5, 5};// Acceleration in X-axis (forward motion)
         double[] acceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off), standard Gravity 9.81 m/s^2. If the plane increase attitude, then this value also be increased
         double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0}; // Acceleration in Z-axis (wingtip to wingtip)
         double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
         double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Y-axis
         double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
+
+
+ */
+        double[] acceleration_Long_Values = {0, 0, 0, 0, -0.2}; // Acceleration in X-axis (forward motion - deceleration during landing)
+        double[] acceleration_Ver_Values = {0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off - reduced due to landing)
+        double[] acceleration_Lat_Values = {0, 0, 0, 0, 2}; // Acceleration in Z-axis (wingtip to wingtip) - slight side movement possible
+        double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 1}; // Example rotation acceleration in X-axis - minor pitch change
+        double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0.5}; // Example rotation acceleration in Y-axis - some roll during touchdown
+        double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis - potential yaw for course correction
+
+
+
 
         int timeDelay = 500; // Example time delays in milliseconds
 

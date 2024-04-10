@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import javax.swing.*;
+import java.awt.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class GForceMeterTest {
@@ -77,6 +79,25 @@ class GForceMeterTest {
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
 
+    @Test
+    public void testCockpitDegreeWhileLanding_1(){
+        // Acceleration in Long-axis (forward motion - deceleration during landing)
+        // Acceleration in Ver-axis (lift-off - reduced due to landing)
+        // Acceleration in Z-axis (wingtip to wingtip) - slight side movement possible
+        // Example rotation acceleration in X-axis - minor pitch change
+        // Example rotation acceleration in Y-axis - some roll during touchdown
+        // Example rotation acceleration in Z-axis - potential yaw for course correction
+        gForceMeter.setAccelerations(-2,-1.5,0.2,0.1,0.3,0.5);
+        double gForce_with_gravity = 0.87;
+        assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
+    }
+
+    @Test
+    public void testCockpitDegreeWhileMakingUturn_1(){
+        gForceMeter.setAccelerations(-0.2,0,2,1,0.5,0);
+        double gForce_with_gravity = 1.03;
+        assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
+    }
 
     @Test
     public void testFeetToMeter() {
