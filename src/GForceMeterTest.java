@@ -1,8 +1,6 @@
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
 import javax.swing.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class GForceMeterTest {
@@ -38,6 +36,47 @@ class GForceMeterTest {
         assertEquals(rotationAccelerationY, gForceMeter.rotationAcceleration_Ver);
         assertEquals(rotationAccelerationZ, gForceMeter.rotationAcceleration_Lat);
     }
+
+    //When airplane accelerate
+    @Test
+    public void testCockpitDegreeWithLongitudinalAccelerate_1(){
+        gForceMeter.setAccelerations(5,0,0,0,0,0);
+        double gForce_no_GRAVITY = 0.5;
+        assertEquals(gForce_no_GRAVITY, gForceMeter.calculateTotalGForce_no_GRAVITY(), 0.01);
+    }
+
+    //when airplane accelerate (with GRAVITY)
+    @Test
+    public void testCockpitDegreeWithLongitudinalAccelerate_2(){
+        gForceMeter.setAccelerations(5,0,0,0,0,0);
+        double gForce_with_gravity = 1.12;
+        assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
+    }
+
+    //Test from here always with GRAVITY
+
+    //When takeoff and with vertical acceleration = 3m/s^2
+    @Test
+    public void testCockpitDegreeWithLongitudinalAccelerate_3(){
+        gForceMeter.setAccelerations(5,3,0,0,0,0);
+        double gForce_with_gravity = 1.401;
+        assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
+    }
+
+    @Test
+    public void testCockpitDegreeWithLongitudinalAccelerate_4(){
+        gForceMeter.setAccelerations(0,0,0,0,0,0);
+        double gForce_with_gravity = 1;
+        assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
+    }
+
+    @Test
+    public void testCockpitDegreeWithLongitudinalAccelerate_5(){
+        gForceMeter.setAccelerations(-1,-2,0,0,0,0);
+        double gForce_with_gravity = 0.8;
+        assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
+    }
+
 
     @Test
     public void testFeetToMeter() {

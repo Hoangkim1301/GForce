@@ -43,7 +43,7 @@ public class GForceCalculator {
         // Assuming accelerationX, accelerationY, and accelerationZ are obtained from Microsoft Flight Simulator
         // You need to replace these with actual values obtained from the simulator
 
-        double accelerationX = 6; // making a right turn
+        double accelerationX = 1.4; // making a right turn
         double accelerationY = 0; // pitch up
         double accelerationZ = 5; // increase attitude
 
