@@ -66,6 +66,7 @@ class GForceMeterTest {
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
 
+    //When airplane stand still only have 1g from GRAVITY
     @Test
     public void testCockpitDegreeWithLongitudinalAccelerate_4(){
         gForceMeter.setAccelerations(0,0,0,0,0,0);
@@ -73,6 +74,7 @@ class GForceMeterTest {
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
 
+    //when airplane reduce velocity and attitude
     @Test
     public void testCockpitDegreeWithLongitudinalAccelerate_5(){
         gForceMeter.setAccelerations(-1,-2,0,0,0,0);
@@ -93,10 +95,20 @@ class GForceMeterTest {
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
 
+    //Yaw Maneuver to right
     @Test
     public void testCockpitDegreeWhileMaking_U_turn_1(){
         gForceMeter.setAccelerations(-0.2,0,2,1,0.5,0);
         double gForce_with_gravity = 1.03;
+        assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
+    }
+
+    //Yaw Maneuver to left
+    @Test
+    public void testCockpitDegreeWhileMaking_U_turn_2(){
+        gForceMeter = new GForceMeter();
+        gForceMeter.setAccelerations(0,0,0,0,0,0, 30, -0.4);
+        double gForce_with_gravity = 1.09;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
 
