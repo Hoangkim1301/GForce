@@ -1,7 +1,6 @@
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import javax.swing.*;
-import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,7 +92,7 @@ class GForceMeterTest {
     }
 
     @Test
-    public void testCockpitDegreeWhileMakingUturn_1(){
+    public void testCockpitDegreeWhileMaking_U_turn_1(){
         gForceMeter.setAccelerations(-0.2,0,2,1,0.5,0);
         double gForce_with_gravity = 1.03;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
@@ -103,20 +102,65 @@ class GForceMeterTest {
     public void testFeetToMeter() {
         GForceMeter gForceMeter = new GForceMeter();
 
-        // Test with a feet value
+        // Test with feet value
         double feetValue = 10.0;
         double expectedMeterValue = 3.048; // 10 feet = 3.048 meters
         double result = gForceMeter.feet_to_meter(feetValue);
         assertEquals(expectedMeterValue, result, 0.001); // Using delta for double comparison
 
-        // Test with a feet value
+        // Test with feet value
         feetValue = 20.0;
         expectedMeterValue = 6.096; // 20 feet = 6.096 meters
         result = gForceMeter.feet_to_meter(feetValue);
         assertEquals(expectedMeterValue, result, 0.001); // Using delta for double comparison
-
-        // Add more test cases as needed
     }
 
+    @Test
+    public void testCalculateTotalGForce_zero_acceleration() {
+        // Test case 1: All accelerations zero
+        GForceMeter meter1 = new GForceMeter();
+        assertEquals(2.0, meter1.calculateTotalGForce(), 0.001);
+    }
 
+    @Test
+    public void testCalculateTotalGForce_one_direction() {
+        // Test case 2: Acceleration only in one direction
+        GForceMeter meter2 = new GForceMeter();
+        meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        assertEquals( Math.sqrt(Math.pow(5.0, 2) + Math.pow(9.81, 2))/ 9.81, meter2.calculateTotalGForce(), 0.001);
+    }
+
+    @Test
+    public void testCalculateTotalGForce_multiple_directions() {
+        // Test case 3: Acceleration in multiple directions
+        GForceMeter meter3 = new GForceMeter();
+        meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0);
+        assertEquals(Math.sqrt(3.0 * 3.0 + (4.0+9.81) * (4.0+9.81) + 5.0 * 5.0 + 1.0 + 2.0 * 2.0 + 3.0 * 3.0) / 9.81,
+                meter3.calculateTotalGForce(), 0.001);
+    }
+
+    @Test
+    public void testCalculateTotalGForce_no_GRAVITY_no_acceleration() {
+        // Test case 1: All accelerations zero
+        GForceMeter meter1 = new GForceMeter();
+        meter1.setAccelerations(0.0,0.0,0.0,0.0,0.0,0.0);
+        assertEquals(0.0, meter1.calculateTotalGForce_no_GRAVITY(), 0.001);
+    }
+
+    @Test
+    public void testCalculateTotalGForce_no_GRAVITY_one_direction() {
+        // Test case 2: Acceleration only in one direction
+        GForceMeter meter2 = new GForceMeter();
+        meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        assertEquals(5.0 / 9.81, meter2.calculateTotalGForce_no_GRAVITY(), 0.001);
+    }
+
+    @Test
+    public void testCalculateTotalGForce_no_GRAVITY_multiple_directions() {
+        // Test case 3: Acceleration in multiple directions
+        GForceMeter meter3 = new GForceMeter();
+        meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0);
+        assertEquals(Math.sqrt(3.0 * 3.0 + 4.0 * 4.0 + 5.0 * 5.0 + 1.0 + 2.0 * 2.0 + 3.0 * 3.0) / 9.81,
+                meter3.calculateTotalGForce_no_GRAVITY(), 0.001);
+    }
 }

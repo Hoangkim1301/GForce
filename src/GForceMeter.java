@@ -1,7 +1,18 @@
 import javax.swing.*;
 import java.awt.*;
 
-
+/**
+ * The GForceMeter class represents a graphical component that displays
+ * G-force and acceleration information. It includes methods to set
+ * acceleration values, calculate total G-force, and draw graphical
+ * representations of the G-force meter.
+ * The GForceMeter panel displays a circular G-force meter, a coordinate
+ * system, and graphs showing the history of longitudinal, vertical, and
+ * lateral accelerations. It also provides information about the total
+ * G-force, cockpit degree, and orientation degrees.
+ * This class is intended to be used in a graphical user interface (GUI)
+ * application where real-time acceleration data needs to be visualized.
+ */
 public class GForceMeter extends JPanel {
     double acceleration_Long;
     double acceleration_Ver;
@@ -20,9 +31,6 @@ public class GForceMeter extends JPanel {
     private final double GRAVITY = 9.81;
 
 
-    /*
-
-     */
     public GForceMeter() {
         this.setPreferredSize(new Dimension(400, 700)); // Adjusted size for visibility
         this.acceleration_Long = 0;
