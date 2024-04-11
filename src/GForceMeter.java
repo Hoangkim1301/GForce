@@ -151,7 +151,11 @@ public class GForceMeter extends JPanel {
 
 
         g.drawString("Cockpit degree: " + String.format("%.2f", calculateDegree(calculateTotalGForce_no_GRAVITY())), getWidth() - 150, 30);
-        g.drawString("Quer degree: " +  String.format("%.2f",calculateDegree(Math.sqrt(Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2))/9.81)), getWidth() - 150, 40);
+        if(bank_degree==0){
+            g.drawString("Quer degree: " +  String.format("%.2f",calculateDegree(Math.sqrt(Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2))/9.81)), getWidth() - 150, 40);
+        }else{
+            g.drawString("Quer degree: " +  String.format("%.2f",calculateDegree(Math.sqrt(Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(calculateAccelerationOfTurn(velocity_Long,Math.toRadians(bank_degree),rotationAcceleration_Ver), 2))/9.81)), getWidth() - 150, 40);
+        }
         g.drawString("Laengs degree: " +  String.format("%.2f",calculateDegree(Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2))/9.81)), getWidth() - 150, 50);
 
         // Draw acceleration graphs
@@ -228,7 +232,6 @@ public class GForceMeter extends JPanel {
             pixelOffsetRoll_Ver = (int) (rotationAcceleration_Ver * SCALE_FACTOR);
         }
         else{
-            System.out.println("(calculateAccelerationOfTurn: "+(calculateAccelerationOfTurn(velocity_Long,Math.toRadians(bank_degree),rotationAcceleration_Ver)));
             pixelOffSetBank_Degree = (int) (calculateAccelerationOfTurn(velocity_Long,Math.toRadians(bank_degree),rotationAcceleration_Ver) * SCALE_FACTOR);
         }
         int pixelOffsetRoll_Lat = (int) (rotationAcceleration_Lat * SCALE_FACTOR);
@@ -308,14 +311,14 @@ public class GForceMeter extends JPanel {
         acceleration values to simulate the gradual acceleration along the x-axis (forward motion), lift-off along the
         y-axis, and climbing along the z-axis. Adjust the duration and values as needed for your simulation.
          */
-        double[] acceleration_Long_Values = {0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5};// Acceleration in X-axis (forward motion)
+        double[] acceleration_Long_Values = {0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0};// Acceleration in X-axis (forward motion)
         double[] acceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off), standard Gravity 9.81 m/s^2. If the plane increase attitude, then this value also be increased
         double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
         double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
-        double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Y-axis
+        double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3}; // Example rotation acceleration in Y-axis
         double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
-        double[] velocity_values = {0, 0, 0, 0, 0, 3, 6, 9, 12, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 20}; //m/s
-        double[] bank_degree_rad_values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.3};
+        double[] velocity_values = {0, 0, 0, 0, 0, 3, 6, 9, 12, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 20, 20}; //m/s
+        double[] bank_degree_rad_values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.3, 0};
 
 
         int timeDelay = 500; // Example time delays in milliseconds
