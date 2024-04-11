@@ -17,7 +17,7 @@ public class GForceMeter extends JPanel {
     private double[] accelerationVerBuffer;
     private double[] accelerationLatBuffer;
     private final int BUFFER_SIZE = 100; // Buffer size for storing acceleration history
-    private final double GRAVITY = 9.81;
+    private final double GRAVITY = 9.81; //Standard earth gravity
 
 
     /*
@@ -26,12 +26,12 @@ public class GForceMeter extends JPanel {
     public GForceMeter() {
         this.setPreferredSize(new Dimension(400, 700)); // Adjusted size for visibility
         this.acceleration_Long = 0;
-        this.acceleration_Ver = 9.81; // m/s^2
+        this.acceleration_Ver = 0;
         this.acceleration_Lat = 0;
         this.rotationAcceleration_Long = 0;
         this.rotationAcceleration_Ver = 0;
         this.rotationAcceleration_Lat = 0;
-        this.total_gForce = 0;
+        this.total_gForce = 1; //9.81m/s^2
 
         // Initialize buffers
         accelerationLongBuffer = new double[BUFFER_SIZE];
@@ -57,64 +57,6 @@ public class GForceMeter extends JPanel {
         repaint(); // Update the display when accelerations change
     }
 
-    private void addToBuffer(double[] buffer, double value) {
-        // Shift elements in the buffer to make space for the new value
-        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
-            buffer[i] = buffer[i + 1];
-        }
-        // Add the new value to the end of the buffer
-        buffer[BUFFER_SIZE - 1] = value;
-    }
-
-    //Convert Feet per second square to meter per second square
-    public double feet_to_meter(double velocity){
-        double FEET_TO_METERS = 0.3048;
-        return velocity * FEET_TO_METERS;
-    }
-
-    public double calculateTotalGForce() {
-        // Combine linear and rotational accelerations to calculate total G-force
-        double totalAcceleration = Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver+GRAVITY, 2) + Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2));
-
-        //totalAcceleration = Math.sqrt(Math.pow(totalAcceleration,2) + Math.pow(GRAVITY,2));
-        // Convert acceleration to G-force
-        return totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
-    }
-
-    double calculateTotalGForce_no_GRAVITY() {
-        // Combine linear and rotational accelerations to calculate total G-force
-        double totalAcceleration = Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver, 2) + Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2));
-
-        //totalAcceleration = Math.sqrt(Math.pow(totalAcceleration,2) + Math.pow(GRAVITY,2));
-        // Convert acceleration to G-force
-        return totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
-    }
-    //Calculate the degree of the cockpit with the given g-Force
-    private double calculateDegree(double gForce){
-        return Math.toDegrees(Math.atan(gForce/GRAVITY*9.81));
-    }
-
-    private void drawGraph(Graphics g, double[] buffer,String name, Color color, int yOffset) {
-        g.setColor(color);
-        int graphHeight = getHeight() / 20;
-        int graphWidth = getWidth() - 20;
-        int scaleX = graphWidth / BUFFER_SIZE;
-        int scaleY = graphHeight / 10; // Scale the graph to fit within the panel
-
-        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
-            int x1 = i * scaleX + 10;
-            int y1 = getHeight() - (int) (buffer[i] * scaleY) - 10 - yOffset;
-            int x2 = (i + 1) * scaleX + 10;
-            int y2 = getHeight() - (int) (buffer[i + 1] * scaleY) - 10 - yOffset;
-
-            g.drawLine(x1, y1, x2, y2);
-            // Draw label for the buffer name
-            if (i == BUFFER_SIZE/2 ) { // Draw the label roughly in the middle of the line
-                int labelX = 10; // Adjust this value as needed for spacing
-                g.drawString(name, labelX,  y1-5);
-            }
-        }
-    }
 
     @Override
     public void paintComponent(Graphics g) {
@@ -144,22 +86,13 @@ public class GForceMeter extends JPanel {
         int x = centerX;
         int y = centerY-200;
 
-        // Convert G-force to pixel offset from the center
-        int pixelOffsetAcc_Long = (int) (acceleration_Long * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetAcc_Ver = (int) (acceleration_Ver * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetAcc_Lat = (int) (acceleration_Lat * SCALE_FACTOR); // Scale factor of 20 pixels per G
-        int pixelOffsetRoll_Long = (int) (rotationAcceleration_Long * SCALE_FACTOR);
-        int pixelOffsetRoll_Ver = (int) (rotationAcceleration_Ver * SCALE_FACTOR);
-        int pixelOffsetRoll_Lat = (int) (rotationAcceleration_Lat * SCALE_FACTOR);
+        //Calculate the position of g Force point in 2D coordinate
+        Point g_force_point = calculateFinalCoordinates(x,y,acceleration_Long,acceleration_Ver,acceleration_Lat,
+                rotationAcceleration_Long,rotationAcceleration_Ver,rotationAcceleration_Lat,SCALE_FACTOR);
+        x = g_force_point.x;
+        y = g_force_point.y;
 
-        x -= pixelOffsetAcc_Lat;
-        x -= pixelOffsetRoll_Long;
-        x -= pixelOffsetRoll_Ver;
-
-        y -= pixelOffsetRoll_Lat;
-        y += pixelOffsetAcc_Long; // Adjusting for correct direction
-        y += pixelOffsetAcc_Ver; // Invert the offset to align with GUI coordinates
-
+        //Add label and position name to the g force point in the coordinate
         if(y==centerY-200){
             g.drawString("Neutral", x + 10, y + 10);
         }else if(y > centerY-200) {
@@ -180,6 +113,8 @@ public class GForceMeter extends JPanel {
         g.setColor(Color.RED);
         g.fillOval(x - 5, y - 5, 10, 10);
         g.drawString("Total G-force: " + String.format("%.2f", total_gForce), getWidth() - 150, 20); //calculateTotalGForce()
+
+
         g.drawString("Cockpit degree: " + String.format("%.2f", calculateDegree(calculateTotalGForce_no_GRAVITY())), getWidth() - 150, 30);
         g.drawString("Quer degree: " +  String.format("%.2f",calculateDegree(Math.sqrt(Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2))/9.81)), getWidth() - 150, 40);
         g.drawString("Laengs degree: " +  String.format("%.2f",calculateDegree(Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2))/9.81)), getWidth() - 150, 50);
@@ -189,6 +124,91 @@ public class GForceMeter extends JPanel {
         drawGraph(g, accelerationLongBuffer, "Longitudinal Acceleration: "+ accelerationLongBuffer[accelerationLongBuffer.length-1],Color.RED, centerY - 150);
         drawGraph(g, accelerationVerBuffer, "Vertical Acceleration: " + accelerationVerBuffer[accelerationVerBuffer.length-1],Color.GREEN, centerY - 200);
         drawGraph(g, accelerationLatBuffer, "Lateral Acceleration: " + accelerationLatBuffer[accelerationVerBuffer.length-1],Color.BLUE, centerY - 250);
+    }
+
+
+    private void addToBuffer(double[] buffer, double value) {
+        // Shift elements in the buffer to make space for the new value
+        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
+            buffer[i] = buffer[i + 1];
+        }
+        // Add the new value to the end of the buffer
+        buffer[BUFFER_SIZE - 1] = value;
+    }
+
+    //Convert Feet per second square to meter per second square
+    public double feet_to_meter(double velocity){
+        double FEET_TO_METERS = 0.3048;
+        return velocity * FEET_TO_METERS;
+    }
+
+    public double calculateTotalGForce() {
+        // Combine linear and rotational accelerations to calculate total G-force
+        double totalAcceleration = Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver+GRAVITY, 2) + Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2));
+
+        //totalAcceleration = Math.sqrt(Math.pow(totalAcceleration,2) + Math.pow(GRAVITY,2));
+        // Convert acceleration to G-force
+        return totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
+    }
+
+    double calculateTotalGForce_no_GRAVITY() {
+        // Combine linear and rotational accelerations to calculate total G-force
+        double totalAcceleration = Math.sqrt(Math.pow(acceleration_Long, 2) + Math.pow(acceleration_Ver, 2) + Math.pow(acceleration_Lat, 2) + Math.pow(rotationAcceleration_Long, 2) + Math.pow(rotationAcceleration_Ver, 2) + Math.pow(rotationAcceleration_Lat, 2));
+        System.out.println(totalAcceleration);
+        //totalAcceleration = Math.sqrt(Math.pow(totalAcceleration,2) + Math.pow(GRAVITY,2));
+        // Convert acceleration to G-force
+        return totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
+    }
+    //Calculate the degree of the cockpit with the given g-Force
+    private double calculateDegree(double gForce){
+        //System.out.println(Math.toDegrees(Math.atan(gForce/GRAVITY*9.81)));
+        return Math.toDegrees(Math.atan(gForce/GRAVITY*9.81));
+    }
+
+    // Method to calculate the final x and y coordinates in a coordinate system
+    private Point calculateFinalCoordinates(int x, int y, double acceleration_Long, double acceleration_Ver, double acceleration_Lat, double rotationAcceleration_Long, double rotationAcceleration_Ver, double rotationAcceleration_Lat, int SCALE_FACTOR) {
+        // Convert accelerations to pixel offsets from the center
+        int pixelOffsetAcc_Long = (int) (acceleration_Long * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetAcc_Ver = (int) (acceleration_Ver * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetAcc_Lat = (int) (acceleration_Lat * SCALE_FACTOR); // Scale factor of 20 pixels per G
+        int pixelOffsetRoll_Long = (int) (rotationAcceleration_Long * SCALE_FACTOR);
+        int pixelOffsetRoll_Ver = (int) (rotationAcceleration_Ver * SCALE_FACTOR);
+        int pixelOffsetRoll_Lat = (int) (rotationAcceleration_Lat * SCALE_FACTOR);
+
+        // Update x coordinate
+        x -= pixelOffsetAcc_Lat;
+        x -= pixelOffsetRoll_Long;
+        x -= pixelOffsetRoll_Ver;
+
+        // Update y coordinate
+        y -= pixelOffsetRoll_Lat;
+        y += pixelOffsetAcc_Long; // Adjusting for correct direction
+        y += pixelOffsetAcc_Ver; // Invert the offset to align with GUI coordinates
+
+        // Return the final coordinates as a Point object
+        return new Point(x, y);
+    }
+
+    private void drawGraph(Graphics g, double[] buffer,String name, Color color, int yOffset) {
+        g.setColor(color);
+        int graphHeight = getHeight() / 20;
+        int graphWidth = getWidth() - 20;
+        int scaleX = graphWidth / BUFFER_SIZE;
+        int scaleY = graphHeight / 10; // Scale the graph to fit within the panel
+
+        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
+            int x1 = i * scaleX + 10;
+            int y1 = getHeight() - (int) (buffer[i] * scaleY) - 10 - yOffset;
+            int x2 = (i + 1) * scaleX + 10;
+            int y2 = getHeight() - (int) (buffer[i + 1] * scaleY) - 10 - yOffset;
+
+            g.drawLine(x1, y1, x2, y2);
+            // Draw label for the buffer name
+            if (i == BUFFER_SIZE/2 ) { // Draw the label roughly in the middle of the line
+                int labelX = 10; // Adjust this value as needed for spacing
+                g.drawString(name, labelX,  y1-5);
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -207,8 +227,6 @@ public class GForceMeter extends JPanel {
         acceleration values to simulate the gradual acceleration along the x-axis (forward motion), lift-off along the
         y-axis, and climbing along the z-axis. Adjust the duration and values as needed for your simulation.
          */
-
-/*
         double[] acceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, -5, -5, -5, 5};// Acceleration in X-axis (forward motion)
         double[] acceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off), standard Gravity 9.81 m/s^2. If the plane increase attitude, then this value also be increased
         double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0}; // Acceleration in Z-axis (wingtip to wingtip)
@@ -217,7 +235,7 @@ public class GForceMeter extends JPanel {
         double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
 
 
- */
+ /*
         double[] acceleration_Long_Values = {0, 0, 0, 0, -0.2}; // Acceleration in X-axis (forward motion - deceleration during landing)
         double[] acceleration_Ver_Values = {0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off - reduced due to landing)
         double[] acceleration_Lat_Values = {0, 0, 0, 0, 2}; // Acceleration in Z-axis (wingtip to wingtip) - slight side movement possible
@@ -226,6 +244,7 @@ public class GForceMeter extends JPanel {
         double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis - potential yaw for course correction
 
 
+  */
 
 
         int timeDelay = 500; // Example time delays in milliseconds
@@ -238,7 +257,6 @@ public class GForceMeter extends JPanel {
             double rotationAccelerationX = rotationAcceleration_Long_Values[i];
             double rotationAccelerationY = rotationAcceleration_Ver_Values[i];
             double rotationAccelerationZ = rotationAcceleration_Lat_Values[i];
-
 
             // Schedule setting acceleration values with a time delay
             Timer timer = new Timer(timeDelay, e -> {
@@ -255,7 +273,7 @@ public class GForceMeter extends JPanel {
                 ex.printStackTrace();
             }
         }
-        System.out.println(gForceMeter.calculateDegree(0.51));
+
 
     }
 }
