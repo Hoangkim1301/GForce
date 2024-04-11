@@ -205,7 +205,6 @@ public class GForceMeter extends JPanel {
                     + Math.pow(calculateAccelerationOfTurn(velocity_Long,Math.toRadians(bank_degree),rotationAcceleration_Ver), 2)
                     + Math.pow(rotationAcceleration_Lat, 2));
         }
-        System.out.println(totalAcceleration);
         //totalAcceleration = Math.sqrt(Math.pow(totalAcceleration,2) + Math.pow(GRAVITY,2));
         // Convert acceleration to G-force
         return totalAcceleration / 9.81; // Divide by gravitational acceleration to get G-force
@@ -217,7 +216,7 @@ public class GForceMeter extends JPanel {
     }
 
     // Method to calculate the final x and y coordinates in a coordinate system
-    private Point calculateFinalCoordinates(int x, int y, double acceleration_Long, double acceleration_Ver,
+    public Point calculateFinalCoordinates(int x, int y, double acceleration_Long, double acceleration_Ver,
                                             double acceleration_Lat, double rotationAcceleration_Long,
                                             double rotationAcceleration_Ver, double rotationAcceleration_Lat,
                                             double velocity_Long, double bank_degree,int SCALE_FACTOR) {

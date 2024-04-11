@@ -8,7 +8,7 @@ class GForceCalculatorTest {
     void calculateTotalGForce_all_direction() {
         // Test case 1: acceleration in all directions
         GForceCalculator calculator1 = new GForceCalculator(3.0, 4.0, 5.0);
-        assertEquals(Math.sqrt(3.0 * 3.0 + 4.0 * 4.0 + 5.0 * 5.0) / 9.81, calculator1.calculateTotalGForce(), 0.001);
+        assertEquals(0.720, calculator1.calculateTotalGForce(), 0.001);
     }
 
     @Test

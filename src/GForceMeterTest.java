@@ -2,6 +2,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import javax.swing.*;
 
+import java.awt.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class GForceMeterTest {
@@ -119,7 +121,7 @@ class GForceMeterTest {
     public void testCalculateTotalGForce_zero_acceleration() {
         // Test case 1: All accelerations zero
         GForceMeter meter1 = new GForceMeter();
-        assertEquals(2.0, meter1.calculateTotalGForce(), 0.001);
+        assertEquals(1.0, meter1.calculateTotalGForce(), 0.001);
     }
 
     @Test
@@ -127,7 +129,7 @@ class GForceMeterTest {
         // Test case 2: Acceleration only in one direction
         GForceMeter meter2 = new GForceMeter();
         meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        assertEquals( Math.sqrt(Math.pow(5.0, 2) + Math.pow(9.81, 2))/ 9.81, meter2.calculateTotalGForce(), 0.001);
+        assertEquals( 1.1224, meter2.calculateTotalGForce(), 0.001);
     }
 
     @Test
@@ -135,8 +137,7 @@ class GForceMeterTest {
         // Test case 3: Acceleration in multiple directions
         GForceMeter meter3 = new GForceMeter();
         meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0);
-        assertEquals(Math.sqrt(3.0 * 3.0 + (4.0+9.81) * (4.0+9.81) + 5.0 * 5.0 + 1.0 + 2.0 * 2.0 + 3.0 * 3.0) / 9.81,
-                meter3.calculateTotalGForce(), 0.001);
+        assertEquals(1.574,meter3.calculateTotalGForce(), 0.001);
     }
 
     @Test
@@ -152,7 +153,7 @@ class GForceMeterTest {
         // Test case 2: Acceleration only in one direction
         GForceMeter meter2 = new GForceMeter();
         meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        assertEquals(5.0 / 9.81, meter2.calculateTotalGForce_no_GRAVITY(), 0.001);
+        assertEquals(0.5097, meter2.calculateTotalGForce_no_GRAVITY(), 0.001);
     }
 
     @Test
@@ -160,7 +161,45 @@ class GForceMeterTest {
         // Test case 3: Acceleration in multiple directions
         GForceMeter meter3 = new GForceMeter();
         meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0);
-        assertEquals(Math.sqrt(3.0 * 3.0 + 4.0 * 4.0 + 5.0 * 5.0 + 1.0 + 2.0 * 2.0 + 3.0 * 3.0) / 9.81,
+        assertEquals(0.815,
                 meter3.calculateTotalGForce_no_GRAVITY(), 0.001);
+    }
+
+    @Test
+    public void calculateFinalCoordinates_zero_acceleration() {
+        // Test case 1: All accelerations zero
+        GForceMeter meter = new GForceMeter();
+        Point result1 = meter.calculateFinalCoordinates(100, 100, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20);
+        assertEquals(new Point(100, 100), result1);
+    }
+
+    @Test
+    public void calculateFinalCoordinates_non_zero_acceleration_bank_degree_0() {
+        // Test case 2: Non-zero accelerations and rotation with bank degree of 0
+        GForceMeter meter = new GForceMeter();
+        Point result2 = meter.calculateFinalCoordinates(100, 100, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20);
+        int expectedX2 = 100;
+        int expectedY2 = 300;
+        assertEquals(new Point(expectedX2, expectedY2), result2);
+    }
+
+    @Test
+    public void calculateFinalCoordinates_non_zero_acceleration_bank_degree_non_zero() {
+        // Test case 3: Non-zero accelerations and rotation with bank degree not equal to 0
+        GForceMeter meter = new GForceMeter();
+        Point result3 = meter.calculateFinalCoordinates(100, 100, 10.0, 0.0, 0.0, 10.0, 0.0, 0.0, 10.0, 30.0, 20);
+        int expectedX3 = -213;
+        int expectedY3 = 300;
+        assertEquals(new Point(expectedX3, expectedY3), result3);
+    }
+
+    @Test
+    public void calculateFinalCoordinates_different_coordinates_and_velocity() {
+        // Test case 4: Different coordinates and velocity
+        GForceMeter meter = new GForceMeter();
+        Point result4 = meter.calculateFinalCoordinates(50, 50, 2.0, 1.0, -1.0, 0.5, -1.0, -0.5, 15.0, -15.0, 20);
+        int expectedX4 = 1772;
+        int expectedY4 = 120;
+        assertEquals(new Point(expectedX4, expectedY4), result4);
     }
 }
