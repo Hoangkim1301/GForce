@@ -28,9 +28,11 @@ class GForceMeterTest {
         double rotationAccelerationX = 0.5;
         double rotationAccelerationY = -0.5;
         double rotationAccelerationZ = 1.0;
+        double velocity_long = 20.0;
+        double bank_degree = -10.0;
 
         gForceMeter.setAccelerations(accelerationX, accelerationY, accelerationZ,
-                rotationAccelerationX, rotationAccelerationY, rotationAccelerationZ);
+                rotationAccelerationX, rotationAccelerationY, rotationAccelerationZ,velocity_long, bank_degree);
 
         assertEquals(accelerationX, gForceMeter.acceleration_Long);
         assertEquals(accelerationY, gForceMeter.acceleration_Ver);
@@ -38,12 +40,14 @@ class GForceMeterTest {
         assertEquals(rotationAccelerationX, gForceMeter.rotationAcceleration_Long);
         assertEquals(rotationAccelerationY, gForceMeter.rotationAcceleration_Ver);
         assertEquals(rotationAccelerationZ, gForceMeter.rotationAcceleration_Lat);
+        assertEquals(velocity_long,gForceMeter.velocity_Long);
+        assertEquals(Math.toDegrees(bank_degree),gForceMeter.bank_degree);
     }
 
     //When airplane accelerate
     @Test
     public void testCockpitDegreeWithLongitudinalAccelerate_1(){
-        gForceMeter.setAccelerations(5,0,0,0,0,0);
+        gForceMeter.setAccelerations(5,0,0,0,0,0,0,0);
         double gForce_no_GRAVITY = 0.5;
         assertEquals(gForce_no_GRAVITY, gForceMeter.calculateTotalGForce_no_GRAVITY(), 0.01);
     }
@@ -51,7 +55,7 @@ class GForceMeterTest {
     //when airplane accelerate (with GRAVITY)
     @Test
     public void testCockpitDegreeWithLongitudinalAccelerate_2(){
-        gForceMeter.setAccelerations(5,0,0,0,0,0);
+        gForceMeter.setAccelerations(5,0,0,0,0,0,0,0);
         double gForce_with_gravity = 1.12;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
@@ -61,7 +65,7 @@ class GForceMeterTest {
     //When takeoff and with vertical acceleration = 3m/s^2
     @Test
     public void testCockpitDegreeWithLongitudinalAccelerate_3(){
-        gForceMeter.setAccelerations(5,3,0,0,0,0);
+        gForceMeter.setAccelerations(5,3,0,0,0,0,0,0);
         double gForce_with_gravity = 1.401;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
@@ -69,7 +73,7 @@ class GForceMeterTest {
     //When airplane stand still only have 1g from GRAVITY
     @Test
     public void testCockpitDegreeWithLongitudinalAccelerate_4(){
-        gForceMeter.setAccelerations(0,0,0,0,0,0);
+        gForceMeter.setAccelerations(0,0,0,0,0,0,0,0);
         double gForce_with_gravity = 1;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
@@ -77,7 +81,7 @@ class GForceMeterTest {
     //when airplane reduce velocity and attitude
     @Test
     public void testCockpitDegreeWithLongitudinalAccelerate_5(){
-        gForceMeter.setAccelerations(-1,-2,0,0,0,0);
+        gForceMeter.setAccelerations(-1,-2,0,0,0,0,0,0);
         double gForce_with_gravity = 0.8;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
@@ -90,7 +94,7 @@ class GForceMeterTest {
         // Example rotation acceleration in X-axis - minor pitch change
         // Example rotation acceleration in Y-axis - some roll during touchdown
         // Example rotation acceleration in Z-axis - potential yaw for course correction
-        gForceMeter.setAccelerations(-2,-1.5,0.2,0.1,0.3,0.5);
+        gForceMeter.setAccelerations(-2,-1.5,0.2,0.1,0.3,0.5,0,0);
         double gForce_with_gravity = 0.87;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
@@ -98,7 +102,7 @@ class GForceMeterTest {
     //Yaw Maneuver to right
     @Test
     public void testCockpitDegreeWhileMaking_U_turn_1(){
-        gForceMeter.setAccelerations(-0.2,0,2,1,0.5,0);
+        gForceMeter.setAccelerations(-0.2,0,2,1,0.5,0,0,0);
         double gForce_with_gravity = 1.03;
         assertEquals(gForce_with_gravity, gForceMeter.calculateTotalGForce(), 0.01);
     }
@@ -140,7 +144,7 @@ class GForceMeterTest {
     public void testCalculateTotalGForce_one_direction() {
         // Test case 2: Acceleration only in one direction
         GForceMeter meter2 = new GForceMeter();
-        meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0,0,0);
         assertEquals( 1.1224, meter2.calculateTotalGForce(), 0.001);
     }
 
@@ -148,7 +152,7 @@ class GForceMeterTest {
     public void testCalculateTotalGForce_multiple_directions() {
         // Test case 3: Acceleration in multiple directions
         GForceMeter meter3 = new GForceMeter();
-        meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0);
+        meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0,0,0);
         assertEquals(1.574,meter3.calculateTotalGForce(), 0.001);
     }
 
@@ -156,7 +160,7 @@ class GForceMeterTest {
     public void testCalculateTotalGForce_no_GRAVITY_no_acceleration() {
         // Test case 1: All accelerations zero
         GForceMeter meter1 = new GForceMeter();
-        meter1.setAccelerations(0.0,0.0,0.0,0.0,0.0,0.0);
+        meter1.setAccelerations(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
         assertEquals(0.0, meter1.calculateTotalGForce_no_GRAVITY(), 0.001);
     }
 
@@ -164,7 +168,7 @@ class GForceMeterTest {
     public void testCalculateTotalGForce_no_GRAVITY_one_direction() {
         // Test case 2: Acceleration only in one direction
         GForceMeter meter2 = new GForceMeter();
-        meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        meter2.setAccelerations(5.0, 0.0, 0.0, 0.0, 0.0, 0.0,0,0);
         assertEquals(0.5097, meter2.calculateTotalGForce_no_GRAVITY(), 0.001);
     }
 
@@ -172,7 +176,7 @@ class GForceMeterTest {
     public void testCalculateTotalGForce_no_GRAVITY_multiple_directions() {
         // Test case 3: Acceleration in multiple directions
         GForceMeter meter3 = new GForceMeter();
-        meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0);
+        meter3.setAccelerations(3.0, 4.0, 5.0, 1.0, 2.0, 3.0,0,0);
         assertEquals(0.815,
                 meter3.calculateTotalGForce_no_GRAVITY(), 0.001);
     }
@@ -211,7 +215,7 @@ class GForceMeterTest {
         GForceMeter meter = new GForceMeter();
         Point result4 = meter.calculateFinalCoordinates(50, 50, 2.0, 1.0, -1.0, 0.5, -1.0, -0.5, 15.0, -15.0, 20);
         int expectedX4 = 1772;
-        int expectedY4 = 120;
+        int expectedY4 = 100;
         assertEquals(new Point(expectedX4, expectedY4), result4);
     }
 

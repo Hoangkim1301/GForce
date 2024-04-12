@@ -24,8 +24,8 @@ public class GForceMeter extends JPanel {
     private int centerX; // X-coordinate of the center of the G-force meter
     private int centerY;// Y-coordinate of the center of the G-force meter
 
-    private double velocity_Long; // True body velocity in m/s
-    private double bank_degree; //Bank angle in degree, bank to the right with positive degree and to the left with negative degree
+    double velocity_Long; // True body velocity in m/s
+    double bank_degree; //Bank angle in degree, bank to the right with positive degree and to the left with negative degree
     private final int SCALE_FACTOR = 10; // Increased scaling factor
     private double[] accelerationLongBuffer;// Buffer to store longitudinal acceleration history
     private double[] accelerationVerBuffer; // Buffer to store vertical acceleration history
@@ -86,31 +86,6 @@ public class GForceMeter extends JPanel {
 
         repaint(); // Update the display when accelerations change
     }
-
-    public void setAccelerations (double acceleration_Long, double acceleration_Ver, double acceleration_Lat,
-                                  double rotationAcceleration_Long, double rotationAcceleration_Ver, double rotationAcceleration_Lat
-                                  ) {
-        this.acceleration_Long = acceleration_Long;
-        this.acceleration_Ver = acceleration_Ver;
-        this.acceleration_Lat = acceleration_Lat;
-        this.rotationAcceleration_Long = rotationAcceleration_Long;
-        this.rotationAcceleration_Ver = rotationAcceleration_Ver;
-        this.rotationAcceleration_Lat = rotationAcceleration_Lat;
-        this.total_gForce = calculateTotalGForce();
-
-        // Add acceleration values to the buffers
-        addToBuffer(accelerationLongBuffer, acceleration_Long);
-        addToBuffer(accelerationVerBuffer, acceleration_Ver);
-        addToBuffer(accelerationLatBuffer, acceleration_Lat);
-        addToBuffer(rotationAccelerationLongBuffer, rotationAcceleration_Long);
-        addToBuffer(rotationAccelerationVerBuffer, rotationAcceleration_Ver);
-        addToBuffer(rotationAccelerationLatBuffer, rotationAcceleration_Lat);
-        addToBuffer(velocityBuffer, velocity_Long);
-        addToBuffer(bankDegreeBuffer, bank_degree * 10);
-
-        repaint(); // Update the display when accelerations change
-    }
-
 
 
     @Override
