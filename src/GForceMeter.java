@@ -14,27 +14,27 @@ import java.awt.*;
  * application where real-time acceleration data needs to be visualized.
  */
 public class GForceMeter extends JPanel {
-    double acceleration_Long;
-    double acceleration_Ver;
-    double acceleration_Lat;
-    double rotationAcceleration_Long;
-    double rotationAcceleration_Ver;
-    double rotationAcceleration_Lat;
-    private double total_gForce;
-    private int centerX;
-    private int centerY;
+    double acceleration_Long;// Acceleration along the longitudinal axis
+    double acceleration_Ver;// Acceleration along the vertical axis
+    double acceleration_Lat;// Acceleration along the lateral axisv
+    double rotationAcceleration_Long;// Rotation acceleration relative to the longitudinal axis
+    double rotationAcceleration_Ver; // Rotation acceleration relative to the vertical axis
+    double rotationAcceleration_Lat; // Rotation acceleration relative to the lateral axis
+    private double total_gForce;// Total G-force experienced by the pilot/passenger
+    private int centerX; // X-coordinate of the center of the G-force meter
+    private int centerY;// Y-coordinate of the center of the G-force meter
 
     private double velocity_Long; // True body velocity in m/s
     private double bank_degree; //Bank angle in degree, bank to the right with positive degree and to the left with negative degree
     private final int SCALE_FACTOR = 10; // Increased scaling factor
-    private double[] accelerationLongBuffer;
-    private double[] accelerationVerBuffer;
-    private double[] accelerationLatBuffer;
-    private double[] rotationAccelerationLongBuffer;
-    private double[] rotationAccelerationVerBuffer;
-    private double[] rotationAccelerationLatBuffer;
-    private double[] velocityBuffer;
-    private double[] bankDegreeBuffer;
+    private double[] accelerationLongBuffer;// Buffer to store longitudinal acceleration history
+    private double[] accelerationVerBuffer; // Buffer to store vertical acceleration history
+    private double[] accelerationLatBuffer; // Buffer to store lateral acceleration history
+    private double[] rotationAccelerationLongBuffer; // Buffer to store rotation acceleration history relative to the longitudinal axis
+    private double[] rotationAccelerationVerBuffer; // Buffer to store rotation acceleration history relative to the vertical axis
+    private double[] rotationAccelerationLatBuffer; // Buffer to store rotation acceleration history relative to the lateral axis
+    private double[] velocityBuffer; // Buffer to store velocity history
+    private double[] bankDegreeBuffer; // Buffer to store bank angle history
     private final int BUFFER_SIZE = 100; // Buffer size for storing acceleration history
     private final double GRAVITY = 9.81; //Standard earth gravity
 
@@ -80,7 +80,7 @@ public class GForceMeter extends JPanel {
         addToBuffer(rotationAccelerationLongBuffer, rotationAcceleration_Long);
         addToBuffer(rotationAccelerationVerBuffer, rotationAcceleration_Ver);
         addToBuffer(rotationAccelerationLatBuffer, rotationAcceleration_Lat);
-        addToBuffer(velocityBuffer, velocity_Long);
+        addToBuffer(velocityBuffer, velocity_Long/10);
         addToBuffer(bankDegreeBuffer, bank_degree_rad*10);
 
         repaint(); // Update the display when accelerations change
@@ -292,7 +292,9 @@ public class GForceMeter extends JPanel {
     }
 
     double calculateAccelerationOfTurn(double velocity_Long,  double bank_degree_rad, double rotationAcceleration_Ver){
-        if(velocity_Long<=0) System.out.println("STALL!!! PULL UP");
+        //while velocity in longitude axis is equals or smaller than 0 while airplane is making a turn
+        //in reality this value could be greater link: https://monroeaerospace.com/blog/what-is-a-stall-speed-and-how-does-it-affect-airplanes/#:~:text=Stall%20speed%20is%20simply%20the,and%20even%20the%20weather%20dimensions.
+        if(velocity_Long <= 0) System.out.println("STALL!!! PULL UP");
         double radius_of_turn = calculateRadiusOfTurn( velocity_Long, bank_degree_rad);
         double velocity_Long_pow2 = Math.pow(velocity_Long, 2);
 
@@ -327,7 +329,6 @@ public class GForceMeter extends JPanel {
     }
 
     public static void main(String[] args) {
-
         JFrame frame = new JFrame("G-Force Meter");
         GForceMeter gForceMeter = new GForceMeter();
         frame.add(gForceMeter);
@@ -335,7 +336,6 @@ public class GForceMeter extends JPanel {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
 
         System.out.println("Test radius of turn:" + gForceMeter.calculateRadiusOfTurn(15,Math.toRadians(20)));
         System.out.println("g force of turn " + gForceMeter.calculateAccelerationOfTurn(30.86, Math.toRadians(20), 0)/9.81);
@@ -346,17 +346,40 @@ public class GForceMeter extends JPanel {
         acceleration values to simulate the gradual acceleration along the x-axis (forward motion), lift-off along the
         y-axis, and climbing along the z-axis. Adjust the duration and values as needed for your simulation.
          */
-        double[] acceleration_Long_Values = {-1, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0};// Acceleration in X-axis (forward motion)
-        double[] acceleration_Ver_Values = {-2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off), standard Gravity 9.81 m/s^2. If the plane increase attitude, then this value also be increased
+        /*
+        double[] acceleration_Long_Values = {0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5};// Acceleration in X-axis (forward motion)
+        double[] acceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off), standard Gravity 9.81 m/s^2. If the plane increase attitude, then this value also be increased
         double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
         double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
         double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Y-axis
         double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
-        double[] velocity_values = {0, 20, 0, 0, 0, 3, 6, 9, 12, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 20, 30}; //m/s
-        double[] bank_degree_rad_values = {0, 0.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.4, 0.3, 0.4};
+        double[] velocity_values = {0, 0, 0, 0, 0, 3, 6, 9, 12, 15, 15, 15, 15, 20, 20, 20, 20, 20, 20, 20, 20, 25}; //m/s
+        double[] bank_degree_rad_values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+         */
+/*
+        double[] acceleration_Long_Values = {0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5};// Acceleration in X-axis (forward motion)
+        double[] acceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Y-axis (lift-off), standard Gravity 9.81 m/s^2. If the plane increase attitude, then this value also be increased
+        double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
+        double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
+        double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Y-axis
+        double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
+        double[] velocity_values = {0, 0, 0, 0, 0, 3, 6, 9, 12, 15, 15, 15, 15, 20, 20, 20, 20, 20, 20, 20, 20, 25}; //m/s
+        double[] bank_degree_rad_values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0.3, 0.3, 0.3, 0.3};
 
-        int timeDelay = 500; // Example time delays in milliseconds
+ */
+
+        double[] acceleration_Long_Values = {0, -1, -2, -2, -2, 0, 0, -2, 0, 0, -3, 0, -1, 0, 0, -1, -4, -3, -2, -1, -0.5, 0};// Acceleration in X-axis (forward motion)
+        double[] acceleration_Ver_Values = {0, -2, -2, -2, 0, 0, 0, 0, -2, -2, -2, -2, -2, 0, 0, -1, -1, -1, -1, 0, 0, 0}; // Acceleration in Y-axis (lift-off), standard Gravity 9.81 m/s^2. If the plane increase attitude, then this value also be increased
+        double[] acceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Acceleration in Z-axis (wingtip to wingtip)
+        double[] rotationAcceleration_Long_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in X-axis
+        double[] rotationAcceleration_Ver_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Y-axis
+        double[] rotationAcceleration_Lat_Values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Example rotation acceleration in Z-axis
+        double[] velocity_values = {60, 60, 50, 50, 45, 45, 45, 40, 40, 40, 35, 35, 35, 30, 25, 25, 20, 10, 5, 2, 1, 0}; //m/s
+        double[] bank_degree_rad_values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, -0.2, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        int timeDelay = 200; // Example time delays in milliseconds
+
 
         // Iterate through arrays and set acceleration values periodically
         for (int i = 0; i < acceleration_Long_Values.length; i++) {

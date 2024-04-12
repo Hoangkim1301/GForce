@@ -214,4 +214,40 @@ class GForceMeterTest {
         int expectedY4 = 120;
         assertEquals(new Point(expectedX4, expectedY4), result4);
     }
+
+    //Test the centripetal acceleration of turn method
+    @Test
+    public void calculateAccelerationOfTurn_Test_01(){
+        double centripetal_acceleration = 3.5; // m/s^2
+        double centripetal_gForce = centripetal_acceleration/9.8;
+
+        assertEquals(3.5, gForceMeter.calculateAccelerationOfTurn(30.86, Math.toRadians(20), 0), 0.1);
+        assertEquals(0.36, gForceMeter.calculateAccelerationOfTurn(30.86, Math.toRadians(20), 0)/9.81, 0.1);
+    }
+
+    //Test the Radius and diameter of turn for an airplane with given velocity and bank-angle
+    //Right horizontal turn in
+    @Test
+    public void calculateRadiusOfTurn_Test_01(){
+        double velocity = 15; // m/s
+        double bank_degree = 20; // degree
+        double radius_of_turn = 63.01; //meter
+        double diameter_of_turn = 126.02; //meter
+
+        assertEquals(radius_of_turn,gForceMeter.calculateRadiusOfTurn(velocity,Math.toRadians(bank_degree)),0.1); // Radius test
+        assertEquals(diameter_of_turn, 2 * gForceMeter.calculateRadiusOfTurn(velocity,Math.toRadians(bank_degree)),0.1); // Diameter test
+    }
+
+    //Test the Radius and diameter of turn for an airplane with given velocity and bank-angle
+    //Left horizontal turn in
+    @Test
+    public void calculateRadiusOfTurn_Test_02(){
+        double velocity = 50; // m/s
+        double bank_degree = 10; // degree
+        double radius_of_turn = 1445.2; //meter
+        double diameter_of_turn = 2890.5; //meter
+
+        assertEquals(radius_of_turn,gForceMeter.calculateRadiusOfTurn(velocity,Math.toRadians(bank_degree)),0.1); // Radius test
+        assertEquals(diameter_of_turn, 2 * gForceMeter.calculateRadiusOfTurn(velocity,Math.toRadians(bank_degree)),0.1); // Diameter test
+    }
 }
